@@ -18,12 +18,24 @@ class gameMaze:
                     if i == '\n':
                         self.grid.append(current)
                         current = []
+
+                for i in range(0,len(self.grid)):
+                    for j in range(0,len(self.grid)):
+                        if self.grid[i][j] == 'S':
+                            self.start = (i, j)
+                        if self.grid[i][j] == 'E':
+                            self.end = (i, j)
+                        if self.grid[i][j] == 'L':
+                            self.lever = (i, j)
+                        if self.grid[i][j] == 'A':
+                            self.lever = (i, j)
+
         except FileNotFoundError:
             print(f"File not found: {filename}")
-    
+
     def getGridMaze(self):
         print(self.grid)
-    
+
     def getStringMaze(self):
         output = ""
         for instances in self.grid:
