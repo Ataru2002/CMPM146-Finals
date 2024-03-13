@@ -14,7 +14,9 @@ test = gameMaze("../mazes/maze1.txt")
 
 isLeverActivated = False
 
+#FIXME: BFS can cause a back-and-forth loop in pathfinding
 while (True):
+    time.sleep(0.25)
     print(test.getString())
     if (not isLeverActivated):
         botPath = BFS(test, test.getBotPos(), test.lever)
@@ -33,8 +35,8 @@ while (True):
         isLeverActivated = True
     
     if (isLeverActivated):
-        botPath = BFS(test, test.getBotPos(), test.end)
-        diff = (botPath[1][0] - botPath[0][0], botPath[1][1] - botPath[0][1])
+        newBotPath = BFS(test, test.getBotPos(), test.end)
+        diff = (newBotPath[1][0] - newBotPath[0][0], newBotPath[1][1] - newBotPath[0][1])
         print(diff)
         if diff == (1, 0):
             test.botAction('d')
