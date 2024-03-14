@@ -1,9 +1,14 @@
-from gameMaze import gameMaze, BFS
+from gameMaze import gameMaze
 
 test = gameMaze("./maze1.txt")
 
-test.getGridMaze()
+#test.getGridMaze()
 
 test.getStringMaze()
 
-print(BFS(test, test.start, test.lever))
+#print(test.BFS(test.start, test.lever))
+
+test.updateBot((12, 1))
+
+
+test.getStringMaze()
