@@ -7,8 +7,7 @@ test = gameMaze("./maze1.txt")
 test.getStringMaze()
 
 #print(test.BFS(test.start, test.lever))
-
-test.updateBot((12, 1))
-
-
+test.getGraphMaze()
+test.updatePos((13, 2), 0)
+test.getGraphMaze()
 test.getStringMaze()

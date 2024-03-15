@@ -19,6 +19,8 @@ class gameMaze:
                         self.grid.append(current)
                         current = []
 
+                self.lever = []
+                self.openWall = []
                 for i in range(0,len(self.grid)):
                     for j in range(0,len(self.grid)):
                         if self.grid[i][j] == 'P':
@@ -28,14 +30,15 @@ class gameMaze:
                         if self.grid[i][j] == 'E':
                             self.end = (i, j)
                         if self.grid[i][j] == 'L':
-                            self.lever = (i, j)
+                            self.lever.append((i, j))
                         if self.grid[i][j] == 'A':
-                            self.openWall = (i, j)
+                            self.openWall.append((i, j))
 
         except FileNotFoundError:
             print(f"File not found: {filename}")
 
-        self.graph = {}
+        self.graph = {} #graph form of the maze
+        self.mapping = {} #mapping of levers and openable walls
         for i in range(0, len(self.grid)):
             for j in range(0, len(self.grid)):
                 if self.grid[i][j] != '#':
@@ -45,8 +48,17 @@ class gameMaze:
                     if j > 0 and self.grid[i][j - 1] != '#': self.graph[(i, j)].append((i, j - 1))
                     if j < len(self.grid) - 1 and self.grid[i][j + 1] != '#': self.graph[(i, j)].append((i, j + 1))
 
+        #ideally lever and openable walls should have the same size
+        for i in range(0, len(self.lever)):
+            self.mapping[self.lever[i]] = self.openWall[i]
+        
+        print(self.mapping)
+
     def getGridMaze(self):
         print(self.grid)
+
+    def getGraphMaze(self):
+        print(self.graph)
 
     def getStringMaze(self):
         output = ""
@@ -60,7 +72,6 @@ class gameMaze:
     # Output a path from a point to any other point in the maze (assuming both are empty spaces)
     def BFS(self, start, goal):
         visited = {}
-
         queue = []
         visited[start] = None
         queue.append(start) # what is the start node?
@@ -90,22 +101,42 @@ class gameMaze:
             return False # Can only move in empty spaces, not walls
         return True
 
-    def updatePlayer(self, newPos):
+    def updatePos(self, newPos, currentPlayer):
         oldPos = (self.player[0], self.player[1])
         if not self.checkLegal(oldPos, newPos):
             return False
-        self.grid[oldPos[0]][oldPos[1]] = ' '
-        self.grid[newPos[0]][newPos[1]] = 'P'
-        return True
+        if oldPos in self.lever:
+            self.grid[oldPos[0]][oldPos[1]] = 'L'
+        elif oldPos in self.openWall:
+            self.grid[oldPos[0]][oldPos[1]] = 'A'
+        else:
+            self.grid[oldPos[0]][oldPos[1]] = ' '
 
-    def updateBot(self, newPos):
-        oldPos = (self.bot[0], self.bot[1])
-        if not self.checkLegal(oldPos, newPos):
-            return False
-        self.grid[oldPos[0]][oldPos[1]] = ' '
-        self.grid[newPos[0]][newPos[1]] = 'B'
+
+        if self.grid[newPos[0]][newPos[1]] == 'L':
+            self.toggleLever(newPos)
+        # 0 means player, 1 means bot
+        if currentPlayer == 0:
+            self.grid[newPos[0]][newPos[1]] = 'P'  
+            self.player = newPos      
+        else:
+            self.grid[newPos[0]][newPos[1]] = 'B'  
+            self.bot = newPos   
         return True
         
+    def toggleLever(self, leverPos):
+        targetWall = self.mapping[leverPos]
+        #convert the openable wall into a grid
+        self.grid[targetWall[0]][targetWall[1]] = '#'
+        #updating the graph
+        print(targetWall)
+        for i in self.graph[targetWall]:
+            self.graph[i] = set(self.graph[i])
+            self.graph[i].discard(targetWall)
+            self.graph[i] = list(self.graph[i])
+        del self.graph[targetWall]
+
+
 def createPath(start, goal, visited):
         path = [goal]
         current = goal
