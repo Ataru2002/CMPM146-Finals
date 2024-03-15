@@ -23,7 +23,7 @@ if input_maze:
 else:
     print("Usage: python game.py <maze_file>")
     print("default to maze1")
-    maze = gameMaze("./maze1.txt")
+    maze = gameMaze("./mazes/maze1.txt")
 
 maze.getStringMaze()
 while(not maze.isTerminal()):
