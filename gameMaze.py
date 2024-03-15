@@ -6,6 +6,7 @@
 # states (Where the player is right now, where the bot is right now) x
 # states that can't be mutate (i.e where the levers, openable walls, start points, end points, etc) x
 # TODO: how to specify which levers trigger which walls
+# FIXME: when player and bot move to the same tile, the game doesn't end
 import constants
 
 class gameMaze:
@@ -184,24 +185,22 @@ class gameMaze:
 
     # Returns True if the game has ended.
     def isTerminal(self):
-        endgame = False
-        if self.player == self.bot or self.player == self.end:
-            endgame = True
-        if self.bot == self.end:
-            endgame = True
-        return endgame
+        return (self.player == self.bot) or (self.player == self.end) or (self.bot == self.end)
+        # endgame = False
+        # if (self.player == self.bot) or (self.player == self.end):
+        #     endgame = True
+        # if self.bot == self.end:
+        #     endgame = True
+        # return endgame
     
     # Returns 0 if the player won, 1 if the bot won, or -1 if the game has not ended.
     def winner(self):
-        player = -1
         if not self.isTerminal():
-            return player
-        if self.player == self.bot or self.player == self.end:
-            player = 0
+            return -1
+        if (self.player == self.bot) or (self.player == self.end):
+            return constants.USER_PLAYER
         if self.bot == self.end:
-            player = 1
-        # 0 is the player, 1 is the bot
-        return player
+            return constants.USER_BOT
     
     # Returns a list of legal moves at currentPos.
     def getLegalActions(self, currentPos):

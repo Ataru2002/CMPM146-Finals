@@ -1,4 +1,4 @@
-# Code taken from 
+# Code taken from P2
 
 class MCTSNode:
     def __init__(self, parent=None, parent_action=None, action_list=[]):

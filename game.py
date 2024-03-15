@@ -35,7 +35,7 @@ while(not maze.isTerminal()):
     print("-----------------------PLAYER TURN-----------------------")
     maze.getStringMaze()
     while True:
-        move = input("Your turn [(U)p, (D)own, (L)eft, (R)ight, (Q)uit]: ").lower()
+        move = input("Your turn [ (U)p, (D)own, (L)eft, (R)ight, (Q)uit ]: ").lower()
         destination = None
         if move == "u":
             destination = (maze.player[0] - 1, maze.player[1])
