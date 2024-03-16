@@ -76,6 +76,12 @@ class gameMaze:
     def getCurrentPlayer(self):
         return self.currentPlayer
 
+    def getPosBot(self):
+        return self.bot
+    
+    def getPosPlayer(self):
+        return self.player
+
     def getGridMaze(self):
         print(self.grid)
 
@@ -111,13 +117,16 @@ class gameMaze:
     # Returns if it's possible to go from currentPos to newPos
     def checkLegal(self, currentPos, newPos):
         if abs(currentPos[0] - newPos[0]) == 1 and currentPos[1] != newPos[1]:
-            print("Illegal move: bad movement")
+            print("Illegal move: vertial bad movement")
+            print(currentPos, newPos)
             return False # Can only move up down
         if abs(currentPos[1] - newPos[1]) == 1 and currentPos[0] != newPos[0]:
-            print("Illegal move: bad movement")
+            print("Illegal move: horizontal bad movement")
+            print(currentPos, newPos)
             return False # Can only move left right
         if abs(currentPos[1] - newPos[1]) > 1 or abs(currentPos[0] - newPos[0]) > 1:
             print("Illegal move: bad movement")
+            print(currentPos, newPos)
             return False # Moves too far
         if self.grid[newPos[0]][newPos[1]] == constants.WALL:
             print("Illegal move: hitting a wall")
