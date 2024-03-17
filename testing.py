@@ -1,17 +1,7 @@
-'''
-Purpose: This file will be use as a game console where players input their input from the controls, bot making moves, until the game ended
-Current task:
-- Get the input from a human (p1)
-- Get the input from a bot (p2)
-- Get a while loop to continously get input, update state, until the game state is terminal
-'''
-
 from gameMaze import gameMaze
 import constants
 import sys
 import random
-
-
 
 maze = None
 input_maze = None
@@ -21,11 +11,13 @@ if len(sys.argv)>1:
 if input_maze:
     maze = gameMaze(input_maze)
 else:
-    print("USAGE: python game.py <maze_file>")
-    print("Resorting to default...")
-    maze = gameMaze("./mazes/default_maze.txt")
+    print("Usage: python game.py <maze_file>")
+    print("default to maze1")
+    maze = gameMaze("./mazes/maze1.txt")
 
+print("Getting String Maze...")
 maze.getStringMaze()
+
 while(not maze.isTerminal()):
     
     print("-----------------------BOT TURN-----------------------")
@@ -56,5 +48,3 @@ while(not maze.isTerminal()):
     maze.updatePos(destination, constants.USER_PLAYER)
 
 print(f"Player {maze.winner()} won POGGERS 🤣😂😁😀😂🤗🤩😘😮😴🤗🥱😑!")
-
-

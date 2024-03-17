@@ -5,7 +5,6 @@
 # graph representation of the maze x
 # states (Where the player is right now, where the bot is right now) x
 # states that can't be mutate (i.e where the levers, openable walls, start points, end points, etc) x
-# TODO: how to specify which levers trigger which walls
 # FIXME: when player and bot move to the same tile, the game doesn't end
 import constants
 
@@ -14,16 +13,25 @@ class gameMaze:
         try:
             with open(filename, 'r') as file:
                 # parse maze.txt file into self.grid
-                content = file.read()
                 self.grid = []
                 current = []
-                for i in content:
-                    if i != '\n':
-                        current.append(i)
-                    if i == '\n':
-                        self.grid.append(current)
-                        current = []
-
+                
+                # initialize grid
+                content = file.readline()
+                while (content != "\n"):
+                    for i in content:
+                        if i != '\n':
+                            current.append(i)
+                    
+                    self.grid.append(current)
+                    current = []
+                    
+                    content = file.readline()
+                
+                # save lever mapping for later
+                content_levers = file.readlines()
+                print(f"content_levers = {content_levers}")
+                    
                 # initialize special tiles
                 self.levers = []
                 self.openWalls = []
@@ -44,13 +52,11 @@ class gameMaze:
             print(f"File not found: {filename}")
             input()
             quit()
-
-        self.graph = {} # graph form of the maze
-        self.mapping = {} # mapping of levers and openable walls
-        # constants.USER_PLAYER = 0, constants.USER_BOT = 1
+        
         self.currentPlayer = -1
 
         # initialize graph form of the maze
+        self.graph = {}
         for i in range(0, len(self.grid)):
             for j in range(0, len(self.grid)):
                 if self.grid[i][j] != constants.WALL:
@@ -63,13 +69,27 @@ class gameMaze:
                         self.graph[(i, j)].append((i, j - 1))
                     if j < len(self.grid) - 1 and self.grid[i][j + 1] != constants.WALL:
                         self.graph[(i, j)].append((i, j + 1))
-
-        # ideally lever and openable walls should have the same size
-        # self.mapping[]
-        for i in range(0, len(self.levers)):
-            # 0 means off, 1 means on
-            self.mapping[self.levers[i]] = (0, self.openWalls[i])
-        #print(self.mapping)
+        
+        # initialize lever-to-wall mapping
+        self.mapping = {} 
+        print(f"self.levers: {self.levers}")
+        print(f"self.openWalls: {self.openWalls}")
+        
+        for l in content_levers:
+            leverY, leverX, wallY, wallX = l.split()
+            new_lever = (int(leverY), int(leverX))
+            new_wall = (int(wallY), int(wallX))
+            
+            if new_lever not in self.levers:
+                print(f"ERROR: ({leverY}, {leverX}) is not a real lever.")
+                quit()
+                
+            if new_wall not in self.openWalls:
+                print(f"ERROR: ({wallY}, {wallX}) is not a real openable wall.")
+                quit()
+                
+            self.mapping[new_lever] = (0, new_wall)
+        print(f"self.mapping: {self.mapping}")
 
     def setCurrentPlayer(self, player):
         self.currentPlayer = player
