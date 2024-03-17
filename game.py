@@ -7,10 +7,11 @@ Current task:
 '''
 
 from gameMaze import gameMaze
+import mctsBot
 import constants
 import sys
 import random
-
+import copy
 
 
 maze = None
@@ -26,12 +27,14 @@ else:
     maze = gameMaze("./mazes/default_maze.txt")
 
 maze.getStringMaze()
-while(not maze.isTerminal()):
+while(True):
     
     print("-----------------------BOT TURN-----------------------")
     maze.getStringMaze()
-    maze.updatePos(random.choice(maze.getLegalActions(maze.bot)), constants.USER_BOT)
-    
+    chosen = mctsBot.think(maze, maze.getPosBot())
+    maze.updatePos(chosen, constants.USER_BOT)
+    if(maze.isTerminal()):
+        break
     print("-----------------------PLAYER TURN-----------------------")
     maze.getStringMaze()
     while True:
@@ -54,7 +57,8 @@ while(not maze.isTerminal()):
         if maze.checkLegal(maze.player, destination):
             break
     maze.updatePos(destination, constants.USER_PLAYER)
-
+    if(maze.isTerminal()):
+        break
 print(f"Player {maze.winner()} won POGGERS 🤣😂😁😀😂🤗🤩😘😮😴🤗🥱😑!")
 
 

@@ -11,6 +11,11 @@ class MCTSNode:
             action_list:    The list of legal actions to be considered at this node.
 
         """
+        '''
+        In this context:
+            - parent action could be the previous position
+            - untried action is the legal moves list
+        '''
         self.parent = parent                    # Parent node to this node
         self.parent_action = parent_action      # The move that got us to this node - "None" for the root node.
 
@@ -24,6 +29,7 @@ class MCTSNode:
         return ' '.join(["[", str(self.parent_action),
                          "Win rate:", "{0:.0f}%".format(100 * self.wins / self.visits),
                          "Visits:", str(self.visits),  "]"])
+        #return str(self.parent_action)
 
     def tree_to_string(self, horizon=1, indent=0):
         """ This method returns a string of the tree down to a defined horizon. The string is recursively constructed.
