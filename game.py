@@ -27,7 +27,7 @@ else:
     maze = gameMaze("./mazes/default_maze.txt")
 
 maze.getStringMaze()
-while(True):
+while True:
     
     print("-----------------------BOT TURN-----------------------")
     maze.getStringMaze()
@@ -35,10 +35,11 @@ while(True):
     maze.updatePos(chosen, constants.USER_BOT)
     if(maze.isTerminal()):
         break
+    
     print("-----------------------PLAYER TURN-----------------------")
     maze.getStringMaze()
     while True:
-        move = input("Your turn [ (U)p, (D)own, (L)eft, (R)ight, (Q)uit ]: ").lower()
+        move = input("(U)p, (D)own, (L)eft, (R)ight, (Q)uit: ").lower()
         destination = None
         if move == "u":
             destination = (maze.player[0] - 1, maze.player[1])
@@ -49,16 +50,20 @@ while(True):
         elif move == "r":
             destination = (maze.player[0], maze.player[1] + 1)
         elif move == "q":
-            print("bye nerd 😘")
+            print("Quitting game...")
             quit()
         else:
-            print("ERROR: PLAYER CANT READ!!!!! 🤣🤣🤣🤣")
+            print("ERROR: Invalid input.")
             continue
         if maze.checkLegal(maze.player, destination):
             break
     maze.updatePos(destination, constants.USER_PLAYER)
     if(maze.isTerminal()):
         break
-print(f"Player {maze.winner()} won POGGERS 🤣😂😁😀😂🤗🤩😘😮😴🤗🥱😑!")
+
+if maze.winner() == constants.USER_BOT:
+    print("You lost. L + Ratio")
+else:
+    print("You won!")
 
 

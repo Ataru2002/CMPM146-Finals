@@ -12,25 +12,22 @@ class gameMaze:
     def __init__(self, filename):
         try:
             with open(filename, 'r') as file:
-                # parse maze.txt file into self.grid
+                # initialize self.grid
                 self.grid = []
-                current = []
                 
-                # initialize grid
                 content = file.readline()
+                current = []
                 while (content != "\n"):
                     for i in content:
                         if i != '\n':
                             current.append(i)
-                    
                     self.grid.append(current)
                     current = []
                     
                     content = file.readline()
                 
                 # save lever mapping for later
-                content_levers = file.readlines()
-                print(f"content_levers = {content_levers}")
+                contentLevers = file.readlines()
                     
                 # initialize special tiles
                 self.levers = []
@@ -71,11 +68,9 @@ class gameMaze:
                         self.graph[(i, j)].append((i, j + 1))
         
         # initialize lever-to-wall mapping
-        self.mapping = {} 
-        print(f"self.levers: {self.levers}")
-        print(f"self.openWalls: {self.openWalls}")
+        self.mapping = {}
         
-        for l in content_levers:
+        for l in contentLevers:
             leverY, leverX, wallY, wallX = l.split()
             new_lever = (int(leverY), int(leverX))
             new_wall = (int(wallY), int(wallX))
@@ -89,7 +84,6 @@ class gameMaze:
                 quit()
                 
             self.mapping[new_lever] = (0, new_wall)
-        print(f"self.mapping: {self.mapping}")
 
     def setCurrentPlayer(self, player):
         self.currentPlayer = player
@@ -111,11 +105,47 @@ class gameMaze:
 
     def getStringMaze(self):
         output = ""
-        for instances in self.grid:
-            for j in instances:
-                output += j
+        
+        # find lever-wall pairs, assign them to same colorId value
+        colorId = 0
+        links = {}
+        print(f"self.mapping:{self.mapping}")
+        for lever, wall in self.mapping.items():
+            print(f"lever:{lever}, wall:{wall}")
+            links[lever] = colorId
+            links[wall[1]] = colorId
+            colorId += 1
+        
+        # print out maze
+        for i in range(0, len(self.grid)):
+            for j in range(0, len(self.grid)):
+                tile = self.grid[i][j]
+                if tile == "P":
+                    output += formatColored(tile, "green")
+                elif tile == "B":
+                    output += formatColored(tile, "red")
+                elif (i,j) in links:
+                    output += formatBg(tile, links[(i,j)])
+                else:
+                    output += tile
             output += "\n"
         print(output)
+        
+        # for instances in self.grid:
+        #     for j in instances:
+        #         if j == "P":
+        #             output += formatColored(j, "green")
+        #         elif j == "B":
+        #             output += formatColored(j, "red")
+        #         elif j == "L":
+        #             output += formatBg(j, "green")
+        #         elif j == "A":
+        #             output += formatBg(j, "red")
+        #         else:
+        #             output += j
+        #     output += "\n"
+        # print(output)
+
 
     
     # Output a path from start to goal in the maze (assuming both are empty spaces), else returns None
@@ -215,12 +245,6 @@ class gameMaze:
     # Returns True if the game has ended.
     def isTerminal(self):
         return (self.player == self.bot) or (self.player == self.end) or (self.bot == self.end)
-        # endgame = False
-        # if (self.player == self.bot) or (self.player == self.end):
-        #     endgame = True
-        # if self.bot == self.end:
-        #     endgame = True
-        # return endgame
     
     # Returns 0 if the player won, 1 if the bot won, or -1 if the game has not ended.
     def winner(self):
@@ -253,3 +277,21 @@ def createPath(start, goal, visited):
             current = visited[current]
         path.reverse()
         return path
+
+def formatColored(str, color):
+    if color == "green":
+        return "\033[92m{}\033[00m".format(str)
+    if color == "red":
+        return "\033[91m{}\033[00m".format(str)
+def formatBg(str, colorId):
+    id = colorId % 5
+    if id == 0:
+        return "\033[43m{}\033[00m".format(str)
+    if id == 1:
+        return "\033[44m{}\033[00m".format(str)
+    if id == 2:
+        return "\033[45m{}\033[00m".format(str)
+    if id == 3:
+        return "\033[41m{}\033[00m".format(str)
+    if id == 4:
+        return "\033[42m{}\033[00m".format(str)
