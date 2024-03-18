@@ -27,11 +27,12 @@ else:
     maze = gameMaze("./mazes/default_maze.txt")
 
 maze.getStringMaze()
+previous = []
 while True:
     
     print(formatColored("-----------------------BOT TURN-----------------------", "red"))
     maze.getStringMaze()
-    chosen = mctsBot.think(maze, maze.getPosBot())
+    chosen = mctsBot.think(maze, maze.getPosBot(), previous)
     maze.updatePos(chosen, constants.USER_BOT)
     if(maze.isTerminal()):
         break

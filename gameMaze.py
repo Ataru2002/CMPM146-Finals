@@ -44,10 +44,8 @@ class gameMaze:
                             self.levers.append((i, j))
                         if self.grid[i][j] == constants.OPEN_WALL:
                             self.openWalls.append((i, j))
-
         except FileNotFoundError:
             print(f"File not found: {filename}")
-            input()
             quit()
         
         self.currentPlayer = -1
@@ -69,7 +67,6 @@ class gameMaze:
         
         # initialize lever-to-wall mapping
         self.mapping = {}
-        
         for l in contentLevers:
             leverY, leverX, wallY, wallX = l.split()
             new_lever = (int(leverY), int(leverX))
@@ -131,32 +128,19 @@ class gameMaze:
                     output += tile
             output += "\n"
         print(output)
-        
-        # for instances in self.grid:
-        #     for j in instances:
-        #         if j == "P":
-        #             output += formatColored(j, "green")
-        #         elif j == "B":
-        #             output += formatColored(j, "red")
-        #         elif j == "L":
-        #             output += formatBg(j, "green")
-        #         elif j == "A":
-        #             output += formatBg(j, "red")
-        #         else:
-        #             output += j
-        #     output += "\n"
-        # print(output)
 
-
-    
     # Output a path from start to goal in the maze (assuming both are empty spaces), else returns None
     def BFS(self, start, goal):
+        if goal not in self.graph or start not in self.graph:
+            return []
         visited = {}
         queue = []
         visited[start] = None
         queue.append(start) # what is the start node?
-        while queue:
-            node = queue.pop()
+        while len(queue) > 0:
+            node = queue[0]
+            del queue[0]
+            #print(node, self.graph[node])
             if node == goal:
                 return createPath(start, goal, visited) # are we returning the path from start to end?
             else:
@@ -164,7 +148,7 @@ class gameMaze:
                     if new_node not in visited:
                         visited[new_node] = node
                         queue.append(new_node)
-        return None
+        return []
     
     # Returns if it's possible to go from currentPos to newPos
     def checkLegal(self, currentPos, newPos):
@@ -213,6 +197,12 @@ class gameMaze:
             self.grid[newPos[0]][newPos[1]] = constants.BOT
             self.bot = newPos   
         return True
+    
+    def countClosed(self):
+        cnt = 0
+        for i in self.mapping:
+            cnt += (i[0] == 1)
+        return cnt
     
     # Toggles the lever at leverPos.
     def toggleLever(self, leverPos):

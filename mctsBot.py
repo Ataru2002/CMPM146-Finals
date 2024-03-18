@@ -5,9 +5,10 @@ import copy
 from random import choice
 from math import sqrt, log
 
-numNodes = 100
+numNodes = 1000
 exploreFaction = 2
 naturalNumber = 2.71828
+
 
 # TODO: how is a "state" represented?
 def traverseNodes(node: MCTSNode, maze: gameMaze, state):
@@ -47,20 +48,64 @@ def expandLeaf(node: MCTSNode, maze: gameMaze, state):
     #print("move chosen in expand_leaf: ", randmove)
     return next_node, maze.getPosBot()
 
+
+def heuristicBot(maze: gameMaze):
+    # Heuristic #1: If the bot can reach the goal faster than the player, simply go for it
+    if maze.BFS(maze.getPosPlayer(), maze.end) == None or len(maze.BFS(maze.getPosBot(), maze.end)) < len(maze.BFS(maze.getPosPlayer(), maze.end)):
+        path = maze.BFS(maze.getPosBot(), maze.end)
+        return path[1]
+    
+
+    # Heuristic #2: Check if the Bot can block any of the path faster than the player can reach it
+    lenchosen = 1000000000
+    chosen = None
+    for i in maze.mapping:
+        if maze.mapping[i][0] == 0:
+            paths_bot = maze.BFS(maze.getPosBot(), i) #Path from the bot to the lever
+            paths_player = maze.BFS(maze.getPosPlayer(), maze.mapping[i][1]) #Path from the player to the wall the lever is associated with
+            if paths_bot != None and paths_player != None and len(paths_bot) < len(paths_player):
+                if lenchosen > len(paths_bot):
+                    chosen = paths_bot
+                    lenchosen = len(paths_bot)
+    if lenchosen < 1000000000:
+        return chosen[1]
+    return chosen
+            
+def heuristicPlayer(maze: gameMaze):
+    if maze.BFS(maze.getPosPlayer(), maze.getPosBot()) == None or maze.BFS(maze.getPosPlayer(), maze.end) != None:
+        return None
+    if len(maze.BFS(maze.getPosPlayer(), maze.getPosBot())) < len(maze.BFS(maze.getPosPlayer(), maze.end)):
+        path = maze.BFS(maze.getPosPlayer(), maze.getPosBot())
+        return path[1]
+    if len(maze.BFS(maze.getPosPlayer(), maze.getPosBot())) >= len(maze.BFS(maze.getPosPlayer(), maze.end)):
+        path = maze.BFS(maze.getPosPlayer(), maze.end)
+        return path[1]
+
 def rollout(maze: gameMaze, state):
     while not maze.isTerminal():
-        chosenMove = choice(maze.getLegalActions(state))
-        #print(chosenMove, maze.getPosBot())
+        chosenMove = heuristicBot(maze)
+        if chosenMove == None:
+            chosenMove = choice(maze.getLegalActions(state))
         maze.updatePos(chosenMove, constants.USER_BOT)
+
+        chosenMovePlayer = choice(maze.getLegalActions(maze.getPosPlayer()))
+        maze.updatePos(chosenMovePlayer, constants.USER_PLAYER)
         state = maze.getPosBot()
     return state
 
 def backpropagate(node: MCTSNode, won: bool):
+    '''
     current = node
-    while (current):
+    while current.parent != None:
         node.wins += won
         node.visits += 1
         current = current.parent
+    '''
+    node.visits += 1
+    if node.parent == None: 
+        return
+    node.wins += won
+    backpropagate(node.parent, won)
 
 def ucb(node: MCTSNode):
     '''
@@ -73,22 +118,44 @@ def ucb(node: MCTSNode):
         return -1 
     natural_log = log(node.parent.visits + 1) / log(naturalNumber)
     exploit = (node.wins / (node.visits + 1))
-    explore = exploreFaction * sqrt(natural_log / (node.visits + 1))
+    explore = exploreFaction * sqrt(natural_log / (node.visits))
     return exploit + explore
 
-def getBestAction(root: MCTSNode):
+def getBestAction(root: MCTSNode, previous):
+    '''
     next_node = choice(list(root.child_nodes.values()))
     maxwr = 0
-
     for child in root.child_nodes.values():
         wr = child.wins / child.visits
-
         if wr > maxwr:
             maxwr = wr
             next_node = child
     return next_node.parent_action
+    '''
+    val = -1000000000
+    visit = -1
+    chosen_move = None
+    # Finding the node with the maximum UCT
+    for instances in root.child_nodes.keys():
+        print(root.child_nodes[instances], root.child_nodes[instances].wins / root.child_nodes[instances].visits)
+        if root.child_nodes[instances].wins / root.child_nodes[instances].visits > val:
+            if root.child_nodes[instances].visits > visit:
+                val = root.child_nodes[instances].wins / root.child_nodes[instances].visits
+                visit = root.child_nodes[instances].visits
+                chosen_move = instances
+    
+    for instances in root.child_nodes.keys():
+        if root.child_nodes[instances].wins / root.child_nodes[instances].visits == val:
+            if len(previous) < 5:
+                previous.append(instances)
+            else:
+                if instances not in previous:
+                    previous.append(instances)
+                    chosen_move = instances
+                    del previous[0]
+    return chosen_move
 
-def think(maze: gameMaze, currentState):
+def think(maze: gameMaze, currentState, previous):
     # The state in this context would be the bot's position
     rootNode = MCTSNode(parent=None, parent_action=None, action_list=maze.getLegalActions(currentState))
     for _ in range(numNodes):
@@ -107,8 +174,8 @@ def think(maze: gameMaze, currentState):
         #print("---------------------------------------------")
 
 
-    print(maze.getPosBot(), maze.getPosPlayer())
-    best_action = getBestAction(rootNode)
+    #print(maze.getPosBot(), maze.getPosPlayer())
+    best_action = getBestAction(rootNode, previous)
     print(f"Action chosen: {best_action}")
     return best_action
 
