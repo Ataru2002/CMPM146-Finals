@@ -109,9 +109,7 @@ class gameMaze:
         # find lever-wall pairs, assign them to same colorId value
         colorId = 0
         links = {}
-        print(f"self.mapping:{self.mapping}")
         for lever, wall in self.mapping.items():
-            print(f"lever:{lever}, wall:{wall}")
             links[lever] = colorId
             links[wall[1]] = colorId
             colorId += 1
@@ -121,10 +119,13 @@ class gameMaze:
             for j in range(0, len(self.grid)):
                 tile = self.grid[i][j]
                 if tile == "P":
+                    # player
                     output += formatColored(tile, "green")
                 elif tile == "B":
+                    # bot
                     output += formatColored(tile, "red")
                 elif (i,j) in links:
+                    # lever or wall
                     output += formatBg(tile, links[(i,j)])
                 else:
                     output += tile
@@ -283,15 +284,27 @@ def formatColored(str, color):
         return "\033[92m{}\033[00m".format(str)
     if color == "red":
         return "\033[91m{}\033[00m".format(str)
+    if color == "yellow":
+        return "\033[93m{}\033[00m".format(str)
+    if color == "blue":
+        return "\033[94m{}\033[00m".format(str)
+    if color == "magenta":
+        return "\033[95m{}\033[00m".format(str)
+        
 def formatBg(str, colorId):
     id = colorId % 5
     if id == 0:
+        # yellow
         return "\033[43m{}\033[00m".format(str)
     if id == 1:
+        # blue
         return "\033[44m{}\033[00m".format(str)
     if id == 2:
+        # magenta
         return "\033[45m{}\033[00m".format(str)
     if id == 3:
+        # red
         return "\033[41m{}\033[00m".format(str)
     if id == 4:
+        # green
         return "\033[42m{}\033[00m".format(str)

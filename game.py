@@ -6,7 +6,7 @@ Current task:
 - Get a while loop to continously get input, update state, until the game state is terminal
 '''
 
-from gameMaze import gameMaze
+from gameMaze import gameMaze, formatColored
 import mctsBot
 import constants
 import sys
@@ -29,14 +29,14 @@ else:
 maze.getStringMaze()
 while True:
     
-    print("-----------------------BOT TURN-----------------------")
+    print(formatColored("-----------------------BOT TURN-----------------------", "red"))
     maze.getStringMaze()
     chosen = mctsBot.think(maze, maze.getPosBot())
     maze.updatePos(chosen, constants.USER_BOT)
     if(maze.isTerminal()):
         break
     
-    print("-----------------------PLAYER TURN-----------------------")
+    print(formatColored("-----------------------PLAYER TURN-----------------------", "green"))
     maze.getStringMaze()
     while True:
         move = input("(U)p, (D)own, (L)eft, (R)ight, (Q)uit: ").lower()
@@ -62,8 +62,8 @@ while True:
         break
 
 if maze.winner() == constants.USER_BOT:
-    print("You lost. L + Ratio")
+    print(formatColored("You lost. L + Ratio", "red"))
 else:
-    print("You won!")
+    print(formatColored("You won!", "green"))
 
 
