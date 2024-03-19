@@ -51,8 +51,17 @@ def expandLeaf(node: MCTSNode, maze: gameMaze, state):
 
 def heuristicBot(maze: gameMaze):
     # Heuristic #1: If the bot can reach the goal faster than the player, simply go for it
-    if maze.BFS(maze.getPosPlayer(), maze.end) == None or len(maze.BFS(maze.getPosBot(), maze.end)) < len(maze.BFS(maze.getPosPlayer(), maze.end)):
-        path = maze.BFS(maze.getPosBot(), maze.end)
+
+    botPath = maze.BFS(maze.getPosBot(), maze.end)
+    playerPath = maze.BFS(maze.getPosPlayer(), maze.end)
+
+    if playerPath == None or botPath == None:
+        print("current Maze")
+        print(maze.graph[maze.getPosPlayer()])
+        print(botPath)
+        maze.getStringMaze()
+    elif playerPath == None or len(botPath) < len(playerPath):
+        path = botPath
         return path[1]
     
 
@@ -72,14 +81,45 @@ def heuristicBot(maze: gameMaze):
     return chosen
             
 def heuristicPlayer(maze: gameMaze):
-    if maze.BFS(maze.getPosPlayer(), maze.getPosBot()) == None or maze.BFS(maze.getPosPlayer(), maze.end) != None:
+    '''
+    pathToBot = maze.BFS(maze.getPosPlayer(), maze.getPosBot())
+    pathToEnd = maze.BFS(maze.getPosPlayer(), maze.end)
+
+    if pathToBot == None and pathToEnd == None:
         return None
-    if len(maze.BFS(maze.getPosPlayer(), maze.getPosBot())) < len(maze.BFS(maze.getPosPlayer(), maze.end)):
-        path = maze.BFS(maze.getPosPlayer(), maze.getPosBot())
+    
+    if len(pathToBot) < len(pathToEnd):
+        return pathToBot[1]
+    if len(pathToBot) >= len(pathToEnd):
+        return pathToEnd[1]
+    '''
+    botPath = maze.BFS(maze.getPosBot(), maze.end)
+    playerPath = maze.BFS(maze.getPosPlayer(), maze.end)
+
+    if playerPath == None or botPath == None:
+        print("current Maze")
+        print(maze.graph[maze.getPosPlayer()])
+        print(botPath)
+        maze.getStringMaze()
+    elif botPath == None or len(botPath) > len(playerPath):
+        path = playerPath
         return path[1]
-    if len(maze.BFS(maze.getPosPlayer(), maze.getPosBot())) >= len(maze.BFS(maze.getPosPlayer(), maze.end)):
-        path = maze.BFS(maze.getPosPlayer(), maze.end)
-        return path[1]
+    
+
+    # Heuristic #2: Check if the Player can block any of the path faster than the Bot can reach it
+    lenchosen = 1000000000
+    chosen = None
+    for i in maze.mapping:
+        if maze.mapping[i][0] == 0:
+            paths_player = maze.BFS(maze.getPosPlayer(), i) #Path from the Player to the lever
+            paths_bot = maze.BFS(maze.getPosBot(), maze.mapping[i][1]) #Path from the Bot to the wall the lever is associated with
+            if paths_bot != None and paths_player != None and len(paths_bot) > len(paths_player):
+                if lenchosen > len(paths_player):
+                    chosen = paths_player
+                    lenchosen = len(paths_player)
+    if lenchosen < 1000000000:
+        return chosen[1]
+    return chosen
 
 def rollout(maze: gameMaze, state):
     while not maze.isTerminal():
@@ -88,7 +128,9 @@ def rollout(maze: gameMaze, state):
             chosenMove = choice(maze.getLegalActions(state))
         maze.updatePos(chosenMove, constants.USER_BOT)
 
-        chosenMovePlayer = choice(maze.getLegalActions(maze.getPosPlayer()))
+        chosenMovePlayer = heuristicPlayer(maze)
+        if chosenMovePlayer == None:
+            chosenMovePlayer = choice(maze.getLegalActions(maze.getPosPlayer()))
         maze.updatePos(chosenMovePlayer, constants.USER_PLAYER)
         state = maze.getPosBot()
     return state
@@ -170,6 +212,7 @@ def think(maze: gameMaze, currentState, previous):
         #print("New Maze Pos: ", copyMaze.getPosBot())
         #print("after expand: ", node, state)
         state = rollout(copyMaze, state)
+        #copyMaze.getStringMaze()
         backpropagate(node, (copyMaze.winner() == 1))
         #print("---------------------------------------------")
 

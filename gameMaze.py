@@ -131,8 +131,6 @@ class gameMaze:
 
     # Output a path from start to goal in the maze (assuming both are empty spaces), else returns None
     def BFS(self, start, goal):
-        if goal not in self.graph or start not in self.graph:
-            return []
         visited = {}
         queue = []
         visited[start] = None
@@ -144,11 +142,13 @@ class gameMaze:
             if node == goal:
                 return createPath(start, goal, visited) # are we returning the path from start to end?
             else:
+                if node not in self.graph:
+                    self.getStringMaze()
                 for new_node in self.graph[node]:
                     if new_node not in visited:
                         visited[new_node] = node
                         queue.append(new_node)
-        return []
+        return None
     
     # Returns if it's possible to go from currentPos to newPos
     def checkLegal(self, currentPos, newPos):
@@ -207,6 +207,8 @@ class gameMaze:
     # Toggles the lever at leverPos.
     def toggleLever(self, leverPos):
         active, targetWall = self.mapping[leverPos]
+        if targetWall == self.player or targetWall == self.bot:
+            return
         if active == 0:
             # convert the openable wall into a grid
             self.grid[targetWall[0]][targetWall[1]] = constants.WALL
