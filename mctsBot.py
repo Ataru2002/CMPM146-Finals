@@ -55,12 +55,7 @@ def heuristicBot(maze: gameMaze):
     botPath = maze.BFS(maze.getPosBot(), maze.end)
     playerPath = maze.BFS(maze.getPosPlayer(), maze.end)
 
-    if playerPath == None or botPath == None:
-        print("current Maze")
-        print(maze.graph[maze.getPosPlayer()])
-        print(botPath)
-        maze.getStringMaze()
-    elif playerPath == None or len(botPath) < len(playerPath):
+    if playerPath == None or len(botPath) < len(playerPath):
         path = botPath
         return path[1]
     
@@ -96,12 +91,7 @@ def heuristicPlayer(maze: gameMaze):
     botPath = maze.BFS(maze.getPosBot(), maze.end)
     playerPath = maze.BFS(maze.getPosPlayer(), maze.end)
 
-    if playerPath == None or botPath == None:
-        print("current Maze")
-        print(maze.graph[maze.getPosPlayer()])
-        print(botPath)
-        maze.getStringMaze()
-    elif botPath == None or len(botPath) > len(playerPath):
+    if botPath == None or len(botPath) > len(playerPath):
         path = playerPath
         return path[1]
     
